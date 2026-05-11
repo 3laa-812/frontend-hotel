@@ -21,6 +21,7 @@ const RoomDetailsPage = () => {
   const [showMessage, setShowMessage] = useState(false); // State variable to control message visibility
   const [confirmationCode, setConfirmationCode] = useState(''); // State variable for booking confirmation code
   const [errorMessage, setErrorMessage] = useState(''); // State variable for error message
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // State for image carousel
 
   useEffect(() => {
     const fetchData = async () => {
@@ -133,6 +134,20 @@ const RoomDetailsPage = () => {
 
   const { roomType, roomPrice, roomPhotoUrl, description, bookings } = roomDetails;
 
+  const images = [
+    roomPhotoUrl,
+    "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1000"
+  ];
+
+  const nextImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
+  };
+
   return (
     <div className="room-details-booking">
       {showMessage && (
@@ -146,13 +161,29 @@ const RoomDetailsPage = () => {
         </p>
       )}
       <h2>Room Details</h2>
-      <br />
-      <img src={roomPhotoUrl} alt={roomType} className="room-details-image" />
-      <div className="room-details-info">
-        <h3>{roomType}</h3>
-        <p>Price: ${roomPrice} / night</p>
-        <p>{description}</p>
-      </div>
+      <div className="room-details-layout">
+        <div className="room-details-left">
+          <div className="room-carousel">
+            <button className="carousel-btn prev" onClick={prevImage}>&#10094;</button>
+            <img src={images[currentImageIndex]} alt={roomType} className="room-details-image" />
+            <button className="carousel-btn next" onClick={nextImage}>&#10095;</button>
+            <div className="carousel-indicators">
+              {images.map((_, index) => (
+                <span 
+                  key={index} 
+                  className={`indicator ${index === currentImageIndex ? 'active' : ''}`}
+                  onClick={() => setCurrentImageIndex(index)}
+                ></span>
+              ))}
+            </div>
+          </div>
+          <div className="room-details-info">
+            <h3>{roomType}</h3>
+            <p>Price: ${roomPrice} / night</p>
+            <p>{description}</p>
+          </div>
+        </div>
+        <div className="room-details-right">
       {bookings && bookings.length > 0 && (
         <div>
           <h3>Existing Booking Details</h3>
@@ -168,8 +199,10 @@ const RoomDetailsPage = () => {
         </div>
       )}
       <div className="booking-info">
-        <button className="book-now-button" onClick={() => setShowDatePicker(true)}>Book Now</button>
-        <button className="go-back-button" onClick={() => setShowDatePicker(false)}>Go Back</button>
+        <div className="booking-info-buttons">
+          {!showDatePicker && <button className="book-now-button" onClick={() => setShowDatePicker(true)}>Book Now</button>}
+          {showDatePicker && <button className="go-back-button" onClick={() => setShowDatePicker(false)}>Go Back</button>}
+        </div>
         {showDatePicker && (
           <div className="date-picker-container">
             <DatePicker
@@ -227,6 +260,8 @@ const RoomDetailsPage = () => {
           </div>
         )}
       </div>
+      </div>
+        </div>
     </div>
   );
 };
